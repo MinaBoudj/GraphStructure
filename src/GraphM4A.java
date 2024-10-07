@@ -99,6 +99,7 @@ public int getType() {
 	return this.type;
 }
 public void setAdjmat(float[][] adjmat){ this.adjmat = adjmat; }
+
 //Exercice 1
     //the input graph G(Matrix), and of the output graph Gt(Matrix)
     public GraphM4A transposeGM(){ //complexite polynomiale
@@ -127,9 +128,11 @@ public void setAdjmat(float[][] adjmat){ this.adjmat = adjmat; }
       }else{ //pondéré
           for(int i=0; i<this.n; i++){
               for(int j=0; j<this.n; j++){
-                  WeightedNode4A[] adjlistW = transposed.getAdjlistW();
-                  WeightedNode4A nodeW = new WeightedNode4A(i, adjlistW[j], this.adjmat[i][j]); //on mets à la fin
-                  adjlistW[j] = nodeW;
+                  if(this.adjmat[i][j] != 0){
+                      WeightedNode4A[] adjlistW = transposed.getAdjlistW();
+                      WeightedNode4A nodeW = new WeightedNode4A(i, adjlistW[j], this.adjmat[i][j]); //on mets à la fin
+                      adjlistW[j] = nodeW;
+                  }
               }
           }
       }
@@ -156,4 +159,7 @@ public void setAdjmat(float[][] adjmat){ this.adjmat = adjmat; }
         return k==vertexes.length-1;
     }
 
+    public int getWeighted() {
+        return this.weighted;
+    }
 }

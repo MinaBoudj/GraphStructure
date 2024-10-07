@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class GraphL4A {
@@ -66,13 +68,6 @@ public class GraphL4A {
 						adjlist[i-1]=node;
 					}
 				}
-	  			/*String[] successors= line[1].split(", ");
-	  			System.out.println(i+ " "+ successors.length);
-	  			for (int h=0;h<successors.length;h++) {
-	  				Node4A node=new Node4A(Integer.parseInt(successors[h])-1,null);
-			        node.setNext(adjlist[i-1]);
-			        adjlist[i-1]=node;
-	  			}*/
 	  		}
 	  		else {
 	  			line = line[1].split(" // "); 
@@ -199,7 +194,7 @@ public class GraphL4A {
 		this.adjlist[vertex] = node;
 	}
 
-	//Transposed graph : the input graph G(List), and  the output graph Gt(Matrix)
+	//Transposed graph : the input graph G(List), and  the output graph G(Matrix)
 	public GraphM4A transposeGM(){
 		GraphM4A transposed = new GraphM4A(this.n, this.type, this.weighted);
 		if(weighted == 0){
@@ -270,45 +265,195 @@ public class GraphL4A {
 	public void DFSNum(int s){
 		int[] debut = new int[this.n];
 		int[] fin = new int[this.n];
-		int nb = 0;
-
+		int[] nb = new int[1];
+		String[][] edgeTypes = new String[this.n][this.n]; //stoquer le type des arcs dans un tableau
+		nb[0] = 0;
 		for(int i=0; i<n; i++){
 			debut[i] = 0;
 			fin[i] = 0;
 		}
 
-		DFSNum(s, debut, fin, nb);
+		DFSNum(s-1, debut, fin, nb, edgeTypes);
+
+		System.out.println();
+		for(int i=0; i<n; i++) {
+			for(int j=0; j<n; j++) {
+				if(edgeTypes[i][j] != null) {
+					System.out.println("Arc (" + (i+1) + ", " + (j+1) + "): " + edgeTypes[i][j]);
+				}
+			}
+		}
 	}
 
 	/**
 	 * Parcours DFSNum (en profendeurs)
-	 * */
-	public void DFSNum(int s, int[] debut, int[] fin, int nb){
-		nb++;
-		s--;
-		debut[s] = nb;
+	 * Compléxité = O(n+m)
+	 **/
+	public void DFSNum(int s, int[] debut, int[] fin, int[] nb, String[][] edgeTypes){
+		nb[0]++;
+		debut[s] = nb[0];
+		if(weighted == 0){
+			Node4A current = this.adjlist[s];
+			while(current != null){
+				int t = current.getVal();
+				if(debut[t] == 0){
+					edgeTypes[s][t] = "tree Edge";
+					System.out.print(" "+(t+1)+" ");
+					DFSNum(t, debut, fin, nb, edgeTypes);
+				} else if(fin[t] == 0){
+					edgeTypes[s][t] = "back Edge";
+				} else if(debut[s] < debut[t]){
+					edgeTypes[s][t] = "forward Edge";
+				} else if(debut[s] > debut[t]){
+					edgeTypes[s][t] = "cross Edge";
+				}
+				current = current.getNext();
+			}
+		} else { // graphe pondéré
+			WeightedNode4A current = this.adjlistW[s];
+			while(current != null){
+				int t = current.getVal();
+				if(debut[t] == 0){
+					edgeTypes[s][t] = "tree Edge";
+					System.out.print(" "+(t+1)+" ");
+					DFSNum(t, debut, fin, nb, edgeTypes);
+				} else if(fin[t] == 0){
+					edgeTypes[s][t] = "back Edge";
+				} else if(debut[s] < debut[t]){
+					edgeTypes[s][t] = "forward Edge";
+				} else if(debut[s] > debut[t]){
+					edgeTypes[s][t] = "cross Edge";
+				}
+				current = current.getNext();
+			}
+		}
+		nb[0]++;
+		fin[s] = nb[0];
+	}
+
+
+	/**EXO2 TP2
+	 * Methode qui verifie s'il a un cycle ou pas de le graphe
+	 * Compléxité = O(n+m)
+	 **/
+	public boolean containCycle() {
+		int[] debut = new int[this.n];
+		int[] fin = new int[this.n];
+		int[] nb = new int[1];
+		nb[0] = 0;
+		for(int i=0; i<n; i++){
+			debut[i] = 0;
+			fin[i] = 0;
+		}
+
+		for(int i=0; i<this.n; i++){ //pour chaque sommet regarder s'il y a pas de cycle
+			if(containCycleVertex(i,debut, fin, nb))
+				return true;
+		}
+		return false;
+	}
+
+	private boolean containCycleVertex(int s, int[] debut, int[] fin, int[] nb) {
+		nb[0]++;
+		debut[s] = nb[0];
 		if(weighted==0){
 			Node4A current = this.adjlist[s];
-			while(current!=null){ //pour chaque succ t de s
-				if(debut[current.getVal()]==0){
-					System.out.print(""+current.getVal()+", ");
-					DFSNum(current.getVal(), debut, fin, nb);
+			while(current != null){
+				int t = current.getVal();
+				if(debut[t] == 0){
+					if(containCycleVertex(t, debut, fin, nb))
+						return true;
+				} else if(fin[t] == 0){ //back arc
+					return true;
 				}
 				current = current.getNext();
 			}
-			nb++;
-			fin[s] = nb;
 		}else{
 			WeightedNode4A current = this.adjlistW[s];
-			while(current!=null){ //pour chaque succ t de s
-				if(debut[current.getVal()]==0){
-					System.out.print(""+current.getVal()+", ");
-					DFSNum(current.getVal(), debut, fin, nb);
+			while(current != null){
+				int t = current.getVal();
+				if(debut[t] == 0){
+					if(containCycleVertex(t, debut, fin, nb))
+						return true;
+				} else if(fin[t] == 0){	//back arc
+					return true;
 				}
 				current = current.getNext();
 			}
-			nb++;
-			fin[s] = nb;
+		}
+		nb[0]++;
+		fin[s] = nb[0];
+		return false;
+	}
+
+	/**
+	 * Exo3 TP2
+	 * Methode qui affiche les sommets du cycle s'il y a un
+	 * Complexité O(n+m)
+	 * */
+	public void printCycleVertex(){
+		int[] debut = new int[this.n];
+		int[] fin = new int[this.n];
+		int[] nb = new int[1];
+		nb[0] = 0;
+		List<Integer> cycle = new ArrayList<>();
+		for(int i=0; i<n; i++){
+			debut[i] = 0;
+			fin[i] = 0;
+		}
+
+		for(int i=0; i<this.n; i++){ //pour chaque sommet regarder s'il y a pas de cycle
+			cycle = new ArrayList<>();
+			if(cycleVertex(i, debut, fin ,nb, cycle)){
+				System.out.print("The verteces of the cycle :");
+				if(!cycle.isEmpty()){
+                    for (Integer integer : cycle) {
+                        System.out.print(" " + (integer + 1));
+                    }
+					System.out.println();
+				}
+			return;
+			}
 		}
 	}
+
+	private boolean cycleVertex(int s, int[] debut, int[] fin, int[] nb, List<Integer> cycle) {
+		nb[0]++;
+		debut[s] = nb[0];
+		if(weighted==0){
+			Node4A current = this.adjlist[s];
+			while(current != null){
+				int t = current.getVal();
+				if(debut[t] == 0){//pas encore visité
+					cycle.add(s);
+					if(cycleVertex(t, debut, fin, nb, cycle))
+						return true;
+				} else if(fin[t] == 0){ //back arc
+					cycle.add(s);
+					cycle.add(t);
+					return  true;
+				}
+				current = current.getNext();
+			}
+		}else{
+			WeightedNode4A current = this.adjlistW[s];
+			while(current != null){
+				int t = current.getVal();
+				if(debut[t] == 0){
+					cycle.add(s);
+					if(cycleVertex(t, debut, fin, nb, cycle))
+						return true;
+				} else if(fin[t] == 0){	//back arc
+					cycle.add(s);
+					cycle.add(t);
+					return true;
+				}
+				current = current.getNext();
+			}
+		}
+		nb[0]++;
+		fin[s] = nb[0];
+		return false;
+	}
+
 }

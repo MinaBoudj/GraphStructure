@@ -61,16 +61,24 @@ public class Main4A {
 
           System.out.println("\n*From GM to transpose GL\n");
           GraphL4A Ltransposed = graphM.transposeGML();
-          TwoArrays4A Lpair=Ltransposed.degrees();
-          int[] Lindegree = Lpair.in();
-          int[] Loutdegree = Lpair.out();
-          System.out.println("(List) Indegrees for vertices from 1 to " + Lindegree.length + " for the given digraph");
-          Tools4A.printArray(Lindegree);
-          System.out.println("(List) Outdegrees for vertices from 1 to " + Lindegree.length + " for the given digraph");
-          Tools4A.printArray(Loutdegree);
-          System.out.println();
-
-
+         if(graphM.getWeighted()==0){//Unweighted
+             TwoArrays4A Lpair=Ltransposed.degrees();
+             int[] Lindegree = Lpair.in();
+             int[] Loutdegree = Lpair.out();
+             System.out.println("(List) Indegrees for vertices from 1 to " + Lindegree.length + " for the given digraph");
+             Tools4A.printArray(Lindegree);
+             System.out.println("(List) Outdegrees for vertices from 1 to " + Lindegree.length + " for the given digraph");
+             Tools4A.printArray(Loutdegree);
+             System.out.println();
+         }else{ //weighted
+             TwoArrays4A Lpair=Ltransposed.degreesW();
+             int[] Lindegree = Lpair.in();
+             int[] Loutdegree = Lpair.out();
+             System.out.println("(List)Indegrees for vertices from 1 to " + Lindegree.length + " for the given digraph");
+             Tools4A.printArray(Lindegree);
+             System.out.println("(List)Outdegrees for vertices from 1 to " + Lindegree.length + " for the given digraph");
+             Tools4A.printArray(Loutdegree);
+         }
       }
       
    // If we choose the representation by adjacency lists
@@ -105,6 +113,7 @@ public class Main4A {
 
           /*test Exo1 TP2 */
           System.out.println("\n***teste Exo1 TP2\n");
+          System.out.print("10 ");
           graphL.DFSNum(10);
 
       }
@@ -127,6 +136,17 @@ public class Main4A {
           Tools4A.printArray(indegreeM);
           System.out.println("(List) Outdegrees for vertices from 1 to " + indegreeM.length + " for the given digraph");
           Tools4A.printArray(outdegreeM);
+
+          /*test Exo1 TP2 */
+          System.out.println("\n***teste Exo1 TP2\n");
+          System.out.print("1 ");
+          graphL.DFSNum(1);
+          if(graphL.containCycle())
+              System.out.println("Ce graphe contient un cycle !");
+          else
+              System.out.println("Ce graphe ne contient pas de cycle !");
+          graphL.printCycleVertex();
+
       }
       if (graphL.getType()==1&&graphL.getWeighted()==1){ //directed and weighted
     	  TwoArrays4A pair=graphL.degreesW();
@@ -136,6 +156,17 @@ public class Main4A {
           Tools4A.printArray(indegree);
           System.out.println("(List)Outdegrees for vertices from 1 to " + indegree.length + " for the given digraph");
           Tools4A.printArray(outdegree);
+
+          /*test Exo1 TP2 */
+          System.out.println("\n***teste Exo1 TP2\n");
+          System.out.print("1 ");
+          graphL.DFSNum(1);
+          if(graphL.containCycle())
+              System.out.println("Ce graphe contient un cycle !");
+          else
+              System.out.println("Ce graphe ne contient pas de cycle !");
+
+          graphL.printCycleVertex();
 
       }
       sc.close();
